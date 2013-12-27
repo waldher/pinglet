@@ -1,0 +1,20 @@
+doctype 5
+html(lang="en")
+  head
+    title= Chat
+    meta(name="viewport",content="width=device-width, initial-scale=1.0")
+    link(rel="stylesheet",href="/css/application.css")
+  body
+    #chatWindow
+      #messageTarget
+      #sendWindowBuffer
+    #sendWindow
+      form#sendForm
+        span#sendButtonWrapper
+          button#sendButton.btn Send
+        span#sendInputWrapper
+          input(name="message",autocomplete="off")#sendInput
+    script(type="text/javascript",src="/js/jquery-2.0.3.min.js")
+    script(type="text/javascript",src="/socket.io/socket.io.js")
+    script(type="text/javascript",src="/js/application.js")
+    script(type="text/javascript",src="/js/focus.js")

@@ -1,0 +1,11 @@
+{
+  "name": "lgbrchat",
+  "version": "0.0.0",
+  "private": "true",
+  "dependencies": {
+    "express": "",
+    "socket.io": "",
+    "jade": "",
+    "geoip-lite": ""
+  }
+}
