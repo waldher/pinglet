@@ -12,6 +12,7 @@ app.get('/:chat_id', require('./controllers/index').index);
 require("./controllers/chat")(io.of("/chat"));
 
 app.use(express.static('public'));
+app.use(express.static('vendor/public'));
 
 var listenOn = 3000;
 if(process.env.NODE_ENV == 'production'){
