@@ -38,6 +38,10 @@ socket.on("receive", function(data){
   add_message(data.message, "Them");
 });
 
+socket.on("receive_system", function(data){
+  add_message(data.message, "System");
+});
+
 socket.on("acknowledge", function(data){
   var messageStatus = $('#message-' + data.message_id + ' .messageStatus');
   messageStatus.removeClass("messageStatusNotAcknowledged");
