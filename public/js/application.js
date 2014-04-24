@@ -49,8 +49,10 @@ socket.on("acknowledge", function(data){
 });
 
 $("#sendForm").submit(function(){
-  var message_id = add_message($("#sendInput").val());
-  socket.emit("send", {"message_id": message_id,"message": $("#sendInput").val()});
-  $("#sendInput").val('');
+  if($("#sendInput").val().trim().length > 0){
+    var message_id = add_message($("#sendInput").val());
+    socket.emit("send", {"message_id": message_id,"message": $("#sendInput").val()});
+    $("#sendInput").val('');
+  }
   return false;
 });
