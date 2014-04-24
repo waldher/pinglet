@@ -4,6 +4,7 @@
   "private": "true",
   "dependencies": {
     "express": "",
+    "body-parser": "",
     "socket.io": "",
     "jade": "",
     "geoip-lite": ""

@@ -5,7 +5,7 @@ var socket_io = require('socket.io');
 var io = socket_io.listen(server);
 
 app.engine('.jade', require('jade').__express);
-app.use(express.bodyParser());
+app.use(require('body-parser').json());
 
 app.get('/', require('./controllers/index').index);
 app.get('/:chat_id', require('./controllers/index').index);
