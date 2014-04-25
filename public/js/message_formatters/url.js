@@ -27,7 +27,7 @@ chat_system.on_new_message(function(chunked_message){
       }
 
       var next_url = url_matches.pop();
-      var next_url_position = remaining_message.search(next_url);
+      var next_url_position = remaining_message.indexOf(next_url);
       if(next_url_position > 0){
         result_chunked_message.push({
           "message_formatter": undefined,
