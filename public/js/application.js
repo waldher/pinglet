@@ -1,3 +1,12 @@
+var chat_system = {
+  new_message_hooks: [],
+  on_new_message: function(callback){
+    if(typeof(callback) == "function"){
+      chat_system.new_message_hooks.push(callback);
+    }
+  }
+};
+
 var message_idSequence = 0;
 var message_template =  '<div id="message-SEQ" class="messageRow">';
     message_template += '<div class="messageStatus"></div>';
@@ -7,11 +16,32 @@ var message_template =  '<div id="message-SEQ" class="messageRow">';
 var add_message = function(message, name){
   var will_scroll_to_bottom = $("#chatWindow").scrollTop() > ($("#messageTarget").height() - $(window).height());
 
+  var chunked_message = [
+    {
+      "message_formatter": undefined, // No plugin has yet claimed this section
+      "message": message
+    }
+  ];
+
+  // Callbacks
+  for(var i = 0; i < chat_system.new_message_hooks.length; i++){
+    chunked_message = chat_system.new_message_hooks[i](chunked_message);
+  }
+
+  message_result = "";
+  for(var i = 0; i < chunked_message.length; i++){
+    message_result += chunked_message[i].message;
+  }
+
+  if(message_result.trim().length == 0) {
+    return;
+  }
+
   var message_id = message_idSequence++;
   message_html = message_template.slice(0);
   message_html = message_html.replace("SEQ", ("" + message_id));
   message_html = message_html.replace("SENDER", (name || "Me"));
-  message_html = message_html.replace("BODY", message);
+  message_html = message_html.replace("BODY", message_result);
   $('#messageTarget').append(message_html);
   if(name == undefined){
     $('#message-' + message_id + ' .messageStatus').addClass("messageStatusNotAcknowledged");
