@@ -1,8 +1,8 @@
 var url_regexp = new RegExp(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/gi);
 chat_system.on_new_message(function(chunked_message){
-  var result_chunked_message = []
+  var result_chunked_message = [];
   for(var i = 0; i < chunked_message.length; i++){
-    if(chunked_message.message_formatter != undefined){
+    if(chunked_message[i].message_formatter != undefined){
       result_chunked_message.push(chunked_message[i]);
       continue;
     }
