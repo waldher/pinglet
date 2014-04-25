@@ -1,3 +1,4 @@
+var geoip = require('geoip-lite');
 var possible_chat_characters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 var generate_chat_id = function(){
@@ -26,8 +27,15 @@ module.exports = function(io){
       socket.emit("assign", {"chat_id": chat_id});
       
       //Announce the new chat client to their chat_id
+      var new_connection_geo = geoip.lookup(socket.handshake.address.address);
+      var new_connection_geo_text = "Unknown Location";
+      if(new_connection_geo){
+        new_connection_geo_text = new_connection_geo.country;
+        if(new_connection_geo.city != undefined && new_connection_geo.city.length != 0)
+          new_connection_geo_text += "-" + new_connection_geo.city;
+      }
       for(i in chats[chat_id]){
-        chats[chat_id][i].emit("receive_system", {"message": "Connection from " + socket.handshake.address.address});
+        chats[chat_id][i].emit("receive_system", {"message": "Connection from " + socket.handshake.address.address + " (" + new_connection_geo_text + ")"});
       }
 
       socket.on("send", function (data) {
