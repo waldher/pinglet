@@ -1,9 +1,9 @@
-var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+var possible_chat_characters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 var generate_chat_id = function(){
   var text = "";
   for( var i=0; i < 10; i++ )
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
+    text += possible_chat_characters.charAt(Math.floor(Math.random() * possible_chat_characters.length));
 
   return text;
 };
