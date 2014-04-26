@@ -10,6 +10,5 @@ chat_system.on_new_message(function(chunked_message){
       chunked_message[i].message = "<a href=\"" + chunked_message[i].url + "\" target=\"_blank\"><img src=\"" + chunked_message[i].url + "\" /></a>";
     }
   }
-  console.log(chunked_message);
   return chunked_message;
 });
