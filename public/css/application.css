@@ -3,6 +3,7 @@ html, body {
 	word-wrap: break-word;
 	margin: 0;
 	font-family: sans-serif;
+	overflow: hidden;
 }
 
 #chatWindow {
@@ -41,6 +42,8 @@ html, body {
 #sendInput {
 	border-style: none;
 	width: 100%;
+	resize: none;
+	height: 2em;
 }
 
 .messageStatus {

@@ -78,11 +78,31 @@ socket.on("acknowledge", function(data){
   messageStatus.addClass("messageStatusAcknowledged");
 });
 
-$("#sendForm").submit(function(){
+var sendMessage = function(){
   if($("#sendInput").val().trim().length > 0){
-    var message_id = add_message($("#sendInput").val());
-    socket.emit("send", {"message_id": message_id,"message": $("#sendInput").val()});
+    var message_content = $("#sendInput").val();
+    message_content = message_content.replace(new RegExp('\r?\n','gm'), "<br />\n");
+    var message_id = add_message(message_content);
+    socket.emit("send", {"message_id": message_id,"message": message_content});
     $("#sendInput").val('');
   }
   return false;
+};
+
+$("#sendForm").submit(sendMessage);
+var send_input_shift_down = false;
+$("#sendInput").keydown(function(eventData){
+  if(eventData.keyCode == 16) {
+    send_input_shift_down = true;
+  }
+
+  if(!send_input_shift_down && eventData.keyCode == 13) {
+    sendMessage();
+    return false;
+  }
+});
+$("#sendInput").keyup(function(eventData){
+  if(eventData.keyCode == 16) {
+    send_input_shift_down = false;
+  }
 });
