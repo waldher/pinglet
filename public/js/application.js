@@ -7,7 +7,7 @@ var chat_system = {
   }
 };
 
-var message_idSequence = 0;
+var client_message_id_sequence = 0;
 var message_template =  '<div id="message-SEQ" class="messageRow">';
     message_template += '<div class="messageStatus"></div>';
     message_template += '<div class="messageSender">SENDER</div>';
@@ -19,7 +19,7 @@ var add_message = function(message, name){
   var chunked_message = [
     {
       "message_formatter": undefined, // No plugin has yet claimed this section
-      "message": message
+      "message": message.payload
     }
   ];
 
@@ -37,16 +37,19 @@ var add_message = function(message, name){
     return;
   }
 
-  var message_id = message_idSequence++;
+  var client_message_id = message.message_uuid;
+  if(client_message_id == undefined){
+    client_message_id = client_message_id_sequence++;
+  }
   message_html = message_template.slice(0);
-  message_html = message_html.replace("SEQ", ("" + message_id));
+  message_html = message_html.replace("SEQ", ("" + client_message_id));
   message_html = message_html.replace("SENDER", (name || "Me"));
   message_html = message_html.replace("BODY", message_result);
   $('#messageTarget').append(message_html);
   if(name == undefined){
-    $('#message-' + message_id + ' .messageStatus').addClass("messageStatusNotAcknowledged");
+    $('#message-' + client_message_id + ' .messageStatus').addClass("messageStatusNotAcknowledged");
   } else {
-    $('#message-' + message_id + ' .messageStatus').addClass("messageStatusReceived");
+    $('#message-' + client_message_id + ' .messageStatus').addClass("messageStatusReceived");
   }
 
   // Scroll to bottom
@@ -54,7 +57,7 @@ var add_message = function(message, name){
     $("#chatWindow").scrollTop($("#messageTarget").height());
   }
 
-  return message_id;
+  return client_message_id;
 };
 
 var socket = io.connect("/chat");
@@ -65,15 +68,16 @@ socket.on("assign", function(data){
 });
 
 socket.on("receive", function(data){
-  add_message(data.message, "Them");
+  add_message(data, "Them");
 });
 
 socket.on("receive_system", function(data){
-  add_message(data.message, "System");
+  add_message(data, "System");
 });
 
 socket.on("acknowledge", function(data){
-  var messageStatus = $('#message-' + data.message_id + ' .messageStatus');
+  $("#message-" + data.client_message_id).attr("id", "message-" + data.message_uuid);
+  var messageStatus = $('#message-' + data.message_uuid + ' .messageStatus');
   messageStatus.removeClass("messageStatusNotAcknowledged");
   messageStatus.addClass("messageStatusAcknowledged");
 });
@@ -82,8 +86,8 @@ var sendMessage = function(){
   if($("#sendInput").val().trim().length > 0){
     var message_content = $("#sendInput").val();
     message_content = message_content.replace(new RegExp('\r?\n','gm'), "<br />\n");
-    var message_id = add_message(message_content);
-    socket.emit("send", {"message_id": message_id,"message": message_content});
+    var client_message_id = add_message({"payload": message_content});
+    socket.emit("send", {"client_message_id": client_message_id,"message": message_content});
     $("#sendInput").val('');
   }
   return false;

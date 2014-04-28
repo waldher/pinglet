@@ -1,10 +1,11 @@
 var geoip = require('geoip-lite');
-var possible_chat_characters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+var uuid = require('node-uuid');
+var possible_id_characters = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 
 var generate_chat_id = function(){
   var text = "";
   for( var i=0; i < 10; i++ )
-    text += possible_chat_characters.charAt(Math.floor(Math.random() * possible_chat_characters.length));
+    text += possible_id_characters.charAt(Math.floor(Math.random() * possible_id_characters.length));
 
   return text;
 };
@@ -34,15 +35,17 @@ module.exports = function(io){
         if(new_connection_geo.city != undefined && new_connection_geo.city.length != 0)
           new_connection_geo_text += "-" + new_connection_geo.city;
       }
+      var connection_message_uuid = uuid.v4();
       for(i in chats[chat_id]){
-        chats[chat_id][i].emit("receive_system", {"message": "Connection from " + socket.handshake.address.address + " (" + new_connection_geo_text + ")"});
+        chats[chat_id][i].emit("receive_system", {"message_uuid": connection_message_uuid, "payload": "Connection from " + socket.handshake.address.address + " (" + new_connection_geo_text + ")"});
       }
 
       socket.on("send", function (data) {
-        socket.emit("acknowledge", {"message_id": data.message_id});
+        var message_uuid = uuid.v4();
+        socket.emit("acknowledge", {"client_message_id": data.client_message_id, "message_uuid": message_uuid});
         for(i in chats[chat_id]){
           if(chats[chat_id][i].id != socket.id){
-            chats[chat_id][i].emit("receive", {"message": data.message});
+            chats[chat_id][i].emit("receive", {"message_uuid": message_uuid, "payload": data.message});
           }
         }
       });
