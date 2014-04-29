@@ -1,4 +1,5 @@
 var chat_system = {
+  chat_id: window.location.pathname.slice(1),
   new_message_hooks: [],
   on_new_message: function(callback){
     if(typeof(callback) == "function"){
@@ -25,7 +26,10 @@ var add_message = function(message, name){
 
   // Callbacks
   for(var i = 0; i < chat_system.new_message_hooks.length; i++){
-    chunked_message = chat_system.new_message_hooks[i](chunked_message);
+    var hook_result = chat_system.new_message_hooks[i](chunked_message);
+    if(hook_result != undefined) {
+      chunked_message = hook_result;
+    }
   }
 
   message_result = "";
@@ -64,6 +68,7 @@ var socket = io.connect("/chat");
 socket.emit("chat_id", {"chat_id": window.location.pathname.slice(1)});
 
 socket.on("assign", function(data){
+  chat_system.chat_id = data.chat_id;
   window.history.pushState(undefined, undefined, data.chat_id);
 });
 
