@@ -1,4 +1,4 @@
-var url_image_regexp = new RegExp(/[.](gif|jpg|jpeg|png)$/gi);
+var url_image_regexp = new RegExp(/[.](gif|jpg|jpeg|png)([?].*)?$/gi);
 chat_system.on_new_message(function(chunked_message){
   for(var i = 0; i < chunked_message.length; i++){
     if(chunked_message[i].message_formatter != "url"){
