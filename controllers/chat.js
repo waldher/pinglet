@@ -21,9 +21,9 @@ module.exports = function(io){
         chat_id = generate_chat_id();
       }
       if(chats[chat_id]) {
-        chats[chat_id].push(socket);
+        chats[chat_id].sockets.push(socket);
       } else {
-        chats[chat_id] = [socket];
+        chats[chat_id] = {"sockets": [socket]};
       }
       socket.emit("assign", {"chat_id": chat_id});
       
@@ -36,18 +36,24 @@ module.exports = function(io){
           new_connection_geo_text += "-" + new_connection_geo.city;
       }
       var connection_message_uuid = uuid.v4();
-      for(i in chats[chat_id]){
-        chats[chat_id][i].emit("receive_system", {"message_uuid": connection_message_uuid, "payload": "Connection from " + socket.handshake.address.address + " (" + new_connection_geo_text + ")"});
+      for(i in chats[chat_id].sockets){
+        chats[chat_id].sockets[i].emit("receive_system", {"message_uuid": connection_message_uuid,
+                                                          "previous_message_uuid": chats[chat_id].last_message_uuid,
+                                                          "payload": "Connection from " + socket.handshake.address.address + " (" + new_connection_geo_text + ")"});
+        chats[chat_id].last_message_uuid = connection_message_uuid;
       }
 
       socket.on("send", function (data) {
         var message_uuid = uuid.v4();
-        socket.emit("acknowledge", {"client_message_id": data.client_message_id, "message_uuid": message_uuid});
-        for(i in chats[chat_id]){
-          if(chats[chat_id][i].id != socket.id){
-            chats[chat_id][i].emit("receive", {"message_uuid": message_uuid, "payload": data.message});
+        socket.emit("acknowledge", {"client_message_id": data.client_message_id, "message_uuid": message_uuid, "previous_message_uuid": chats[chat_id].last_message_uuid});
+        for(i in chats[chat_id].sockets){
+          if(chats[chat_id].sockets[i].id != socket.id){
+            chats[chat_id].sockets[i].emit("receive", {"message_uuid": message_uuid,
+                                                       "previous_message_uuid": chats[chat_id].last_message_uuid,
+                                                       "payload": data.message});
           }
         }
+        chats[chat_id].last_message_uuid = message_uuid;
       });
     });
   });
