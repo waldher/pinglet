@@ -1,5 +1,6 @@
 var chat_system = {
   chat_id: window.location.pathname.slice(1),
+  chat_client_id: localStorage.getItem("chat_client_id_" + window.location.pathname.slice(1)),
   new_message_hooks: [],
   on_new_message: function(callback){
     if(typeof(callback) == "function"){
@@ -14,7 +15,7 @@ var message_template =  '<div id="message-SEQ" class="messageRow">';
     message_template += '<div class="messageSender">SENDER</div>';
     message_template += '<div class="messageBody">BODY</div>';
     message_template += '</div>';
-var add_message = function(message, name){
+var add_message = function(message, before_message_uuid){
   var will_scroll_to_bottom = $("#chatWindow").scrollTop() > ($("#messageTarget").height() - $(window).height());
 
   var chunked_message = [
@@ -47,10 +48,14 @@ var add_message = function(message, name){
   }
   message_html = message_template.slice(0);
   message_html = message_html.replace("SEQ", ("" + client_message_id));
-  message_html = message_html.replace("SENDER", (name || "Me"));
+  message_html = message_html.replace("SENDER", (message.sender || "System"));
   message_html = message_html.replace("BODY", message_result);
-  $('#messageTarget').append(message_html);
-  if(name == undefined){
+  if(before_message_uuid) {
+    $("#message-" + before_message_uuid).before(message_html);
+  } else {
+    $('#messageTarget').append(message_html);
+  }
+  if(message.message_uuid == undefined){
     $('#message-' + client_message_id + ' .messageStatus').addClass("messageStatusNotAcknowledged");
   } else {
     $('#message-' + client_message_id + ' .messageStatus').addClass("messageStatusReceived");
@@ -65,22 +70,20 @@ var add_message = function(message, name){
 };
 
 var socket = io.connect("/chat");
-socket.emit("chat_id", {"chat_id": window.location.pathname.slice(1)});
+socket.emit("chats/connect", {"chat_id": window.location.pathname.slice(1), "chat_client_id": chat_system.chat_client_id});
 
-socket.on("assign", function(data){
+socket.on("chats/assign", function(data){
   chat_system.chat_id = data.chat_id;
   window.history.pushState(undefined, undefined, data.chat_id);
+  chat_system.chat_client_id = data.chat_client_id;
+  localStorage.setItem("chat_client_id_" + chat_system.chat_id, chat_system.chat_client_id);
 });
 
-socket.on("receive", function(data){
-  add_message(data, "Them");
+socket.on("messages/receive", function(data){
+  add_message(data);
 });
 
-socket.on("receive_system", function(data){
-  add_message(data, "System");
-});
-
-socket.on("acknowledge", function(data){
+socket.on("messages/acknowledge", function(data){
   $("#message-" + data.client_message_id).attr("id", "message-" + data.message_uuid);
   var messageStatus = $('#message-' + data.message_uuid + ' .messageStatus');
   messageStatus.removeClass("messageStatusNotAcknowledged");
@@ -91,8 +94,8 @@ var sendMessage = function(){
   if($("#sendInput").val().trim().length > 0){
     var message_content = $("#sendInput").val();
     message_content = message_content.replace(new RegExp('\r?\n','gm'), "<br />\n");
-    var client_message_id = add_message({"payload": message_content});
-    socket.emit("send", {"client_message_id": client_message_id,"message": message_content});
+    var client_message_id = add_message({"sender": chat_system.chat_client_id,"payload": message_content});
+    socket.emit("messages/create", {"client_message_id": client_message_id,"sender": chat_system.chat_client_id,"message": message_content});
     $("#sendInput").val('');
   }
   return false;
