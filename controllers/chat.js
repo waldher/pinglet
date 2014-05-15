@@ -14,6 +14,7 @@ var generate_id = function(id_length){
 };
 
 var chats = {};
+var messages = {};
 
 module.exports = function(io){
   io.on("connection", function(socket){
@@ -44,29 +45,33 @@ module.exports = function(io){
       }
       var connection_message_uuid = uuid.v4();
       for(i in chats[chat_id].sockets){
-        chats[chat_id].sockets[i].emit("messages/receive", {"message_uuid": connection_message_uuid,
-                                                            "previous_message_uuid": chats[chat_id].last_message_uuid,
-                                                            "sender": undefined,
-                                                            "payload": "Connection from " + socket.handshake.address.address + " (" + new_connection_geo_text + ")"});
-        chats[chat_id].last_message_uuid = connection_message_uuid;
+        var message = {"message_uuid": connection_message_uuid,
+                       "previous_message_uuid": chats[chat_id].last_message_uuid,
+                       "sender": undefined,
+                       "payload": "Connection from " + socket.handshake.address.address + " (" + new_connection_geo_text + ")"}
+        chats[chat_id].sockets[i].emit("messages/receive", message);
+        messages[connection_message_uuid] = message;
       }
+      chats[chat_id].last_message_uuid = connection_message_uuid;
 
       socket.on("messages/create", function (data) {
         var message_uuid = uuid.v4();
         socket.emit("messages/acknowledge", {"client_message_id": data.client_message_id, "message_uuid": message_uuid, "previous_message_uuid": chats[chat_id].last_message_uuid});
+        var message = {"message_uuid": message_uuid,
+                       "previous_message_uuid": chats[chat_id].last_message_uuid,
+                       "sender": data.sender,
+                       "payload": data.message};
         for(i in chats[chat_id].sockets){
           if(chats[chat_id].sockets[i].id != socket.id){
-            chats[chat_id].sockets[i].emit("messages/receive", {"message_uuid": message_uuid,
-                                                       "previous_message_uuid": chats[chat_id].last_message_uuid,
-                                                       "sender": data.sender,
-                                                       "payload": data.message});
+            chats[chat_id].sockets[i].emit("messages/receive", message);
           }
         }
+        messages[message_uuid] = message;
         chats[chat_id].last_message_uuid = message_uuid;
       });
 
-      socket.on("messages/get", function (data) {
-        
+      socket.on("messages/get", function (message_uuid, callback) {
+        socket.emit("messages/receive", messages[message_uuid]);
       });
     });
   });

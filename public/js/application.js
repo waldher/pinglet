@@ -50,10 +50,14 @@ var add_message = function(message, before_message_uuid){
   message_html = message_html.replace("SEQ", ("" + client_message_id));
   message_html = message_html.replace("SENDER", (message.sender || "System"));
   message_html = message_html.replace("BODY", message_result);
-  if(before_message_uuid) {
-    $("#message-" + before_message_uuid).before(message_html);
+  var next_message_div = $("[x-previous-message-uuid='" + client_message_id + "']");
+  if(next_message_div.length != 0) {
+    next_message_div.before(message_html);
   } else {
     $('#messageTarget').append(message_html);
+  }
+  if(message.previous_message_uuid){
+    $("#message-" + client_message_id).attr("x-previous-message-uuid", message.previous_message_uuid);
   }
   if(message.message_uuid == undefined){
     $('#message-' + client_message_id + ' .messageStatus').addClass("messageStatusNotAcknowledged");
@@ -81,10 +85,15 @@ socket.on("chats/assign", function(data){
 
 socket.on("messages/receive", function(data){
   add_message(data);
+  if(data.previous_message_uuid && $("#message-" + data.previous_message_uuid).length == 0){
+    socket.emit("messages/get", data.previous_message_uuid);
+  }
 });
 
 socket.on("messages/acknowledge", function(data){
-  $("#message-" + data.client_message_id).attr("id", "message-" + data.message_uuid);
+  var message = $("#message-" + data.client_message_id);
+  message.attr("id", "message-" + data.message_uuid);
+  message.attr("x-previous-message-uuid", data.previous_message_uuid);
   var messageStatus = $('#message-' + data.message_uuid + ' .messageStatus');
   messageStatus.removeClass("messageStatusNotAcknowledged");
   messageStatus.addClass("messageStatusAcknowledged");
