@@ -6,6 +6,7 @@ lib-cov
 *.out
 *.pid
 *.gz
+*.swp
 
 pids
 logs
@@ -13,3 +14,8 @@ results
 
 npm-debug.log
 node_modules
+
+db/*
+!db/.gitignore
+tmp/*
+!tmp/.gitignore
