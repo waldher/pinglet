@@ -12,7 +12,7 @@ var chat_system = {
 var client_message_id_sequence = 0;
 var message_template =  '<div id="message-SEQ" class="messageRow">';
     message_template += '<div class="messageStatus"></div>';
-    message_template += '<div class="messageSender">SENDER</div>';
+    message_template += '<div class="messageSender">SENDER <div class="messageTime">TIME</div></div>';
     message_template += '<div class="messageBody">BODY</div>';
     message_template += '</div>';
 var add_message = function(message, before_message_uuid){
@@ -49,6 +49,11 @@ var add_message = function(message, before_message_uuid){
   message_html = message_template.slice(0);
   message_html = message_html.replace("SEQ", ("" + client_message_id));
   message_html = message_html.replace("SENDER", (message.sender || "System"));
+  var time_string = "";
+  if(message.time){
+    time_string = (new Date(message.time)).toLocaleTimeString("en-GB");
+  }
+  message_html = message_html.replace("TIME", time_string);
   message_html = message_html.replace("BODY", message_result);
   var next_message_div = $("[x-previous-message-uuid='" + client_message_id + "']");
   if(next_message_div.length != 0) {
@@ -97,6 +102,7 @@ socket.on("messages/acknowledge", function(data){
   var messageStatus = $('#message-' + data.message_uuid + ' .messageStatus');
   messageStatus.removeClass("messageStatusNotAcknowledged");
   messageStatus.addClass("messageStatusAcknowledged");
+  $('#message-' + data.message_uuid + ' .messageTime').html((new Date(data.time)).toLocaleTimeString("en-GB"));
 });
 
 var sendMessage = function(){

@@ -44,11 +44,12 @@ module.exports = function(io){
           new_connection_geo_text += "-" + new_connection_geo.city;
       }
       var connection_message_uuid = uuid.v4();
+      var message = {"message_uuid": connection_message_uuid,
+                     "previous_message_uuid": chats[chat_id].last_message_uuid,
+                     "sender": undefined,
+                     "time": new Date(),
+                     "payload": "Connection from " + socket.handshake.address.address + " (" + new_connection_geo_text + ")"}
       for(i in chats[chat_id].sockets){
-        var message = {"message_uuid": connection_message_uuid,
-                       "previous_message_uuid": chats[chat_id].last_message_uuid,
-                       "sender": undefined,
-                       "payload": "Connection from " + socket.handshake.address.address + " (" + new_connection_geo_text + ")"}
         chats[chat_id].sockets[i].emit("messages/receive", message);
         messages[connection_message_uuid] = message;
       }
@@ -56,11 +57,12 @@ module.exports = function(io){
 
       socket.on("messages/create", function (data) {
         var message_uuid = uuid.v4();
-        socket.emit("messages/acknowledge", {"client_message_id": data.client_message_id, "message_uuid": message_uuid, "previous_message_uuid": chats[chat_id].last_message_uuid});
         var message = {"message_uuid": message_uuid,
                        "previous_message_uuid": chats[chat_id].last_message_uuid,
+                       "time": new Date(),
                        "sender": data.sender,
                        "payload": data.message};
+        socket.emit("messages/acknowledge", {"client_message_id": data.client_message_id, "message_uuid": message_uuid, "previous_message_uuid": chats[chat_id].last_message_uuid, "time": message.time});
         for(i in chats[chat_id].sockets){
           if(chats[chat_id].sockets[i].id != socket.id){
             chats[chat_id].sockets[i].emit("messages/receive", message);
