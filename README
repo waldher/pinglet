@@ -1,0 +1,17 @@
+Pinglet
+=======
+
+A server-based instant messaging agent
+
+Description
+-----------
+Pinglet provides a server-based instant messaging agent which can manage,
+receive, transport, and store instant messages for multiple users. Pinglet is
+designed to support clients running in web browsers such as mobile browsers or
+desktop, or clients running dedicated client programs, and any combination of
+these.
+
+License
+-------
+This software is distributed under the MIT license. For more details, see the
+LICENSE file.
