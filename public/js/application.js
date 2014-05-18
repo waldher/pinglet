@@ -110,7 +110,7 @@ var sendMessage = function(){
     var message_content = $("#sendInput").val();
     message_content = message_content.replace(new RegExp('\r?\n','gm'), "<br />\n");
     var client_message_id = add_message({"sender": chat_system.chat_client_id,"payload": message_content});
-    socket.emit("messages/create", {"client_message_id": client_message_id,"sender": chat_system.chat_client_id,"message": message_content});
+    socket.emit("messages/create", {"client_message_id": client_message_id,"sender": chat_system.chat_client_id,"payload": message_content});
     $("#sendInput").val('');
   }
   return false;
