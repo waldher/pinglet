@@ -4,7 +4,6 @@ var server = require('http').createServer(app);
 var socket_io = require('socket.io');
 var io = socket_io.listen(server);
 
-app.engine('.jade', require('jade').__express);
 app.use(require('body-parser').json());
 
 app.get('/', require('./controllers/index').index);

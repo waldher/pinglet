@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <title></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/application.css" type="text/css">
+</head>
+
+<body>
+  <div id="chatWindow">
+    <div id="messageTarget"></div>
+    <div id="sendWindowBuffer"></div>
+  </div>
+
+  <div id="sendWindow">
+    <form id="sendForm" name="sendForm">
+      <span id="sendButtonWrapper">
+        <button id="sendButton" class="btn">Send</button>
+      </span>
+      <span id="sendInputWrapper">
+        <textarea name="message" autocomplete="off" id="sendInput"></textarea>
+      </span>
+    </form>
+  </div>
+  <script type="text/javascript" src="/js/jquery-2.0.3.min.js"></script>
+  <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+  <script type="text/javascript" src="/js/application.js"></script>
+  <script type="text/javascript" src="/js/hooks/url.js"></script>
+  <script type="text/javascript" src="/js/hooks/url_images.js"></script>
+  <script type="text/javascript" src="/js/hooks/url_videos.js"></script>
+  <script type="text/javascript" src="/js/hooks/notifications.js"></script>
+  <script type="text/javascript" src="/js/focus.js"></script>
+</body>
+</html>
