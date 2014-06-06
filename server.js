@@ -1,25 +1,22 @@
 var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
-var socket_io = require('socket.io');
-var io = socket_io.listen(server);
 
 app.use(require('body-parser').json());
 
 app.get('/', require('./controllers/index').index);
 app.get('/:chat_id', require('./controllers/index').index);
-require("./controllers/chat")(io.of("/chat"));
+require("./controllers/chat")(server);
 
-app.use(express.static('public'));
-app.use(express.static('vendor/public'));
+app.use(express.static('client'));
 
-var listenOn = 3000;
+var listenOn = 1337;
 if(process.env.NODE_ENV == 'production'){
   listenOn = "tmp/socket";
 }
 
 var startServer = function(){
-  server.listen(listenOn, undefined, undefined, function(){
+  server.listen(listenOn, "::", undefined, function(){
     console.log("Listening on " + listenOn);
     if(typeof(listenOn) == 'string'){
       fs.chmod(listenOn, 0777);
